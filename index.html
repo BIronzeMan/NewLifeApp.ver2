@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="description" content="引っ越し・新生活に必要な費用、手続き、予定をまとめて管理するアプリ">
+  <title>新生活支援アプリ</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 初回アンケート -->
+    <section id="onboardingPage" class="page onboarding-page">
+      <div class="hero">
+        <div class="logo-mark">🏠</div>
+        <h1>新生活支援アプリ</h1>
+        <p>最初にいくつか質問に答えるだけで、あなたに必要な準備を自動で作成します。</p>
+      </div>
+
+      <form id="onboardingForm" class="card form-card">
+        <div class="step-label" id="onboardingStepLabel">STEP 1 / 6</div>
+
+        <div class="question-step active">
+          <h2>まず、あなたについて</h2>
+          <label>名前
+            <input id="qName" type="text" placeholder="例：山田 太郎" required>
+          </label>
+          <label>引っ越し予定
+            <select id="qMovingTiming" required>
+              <option value="">選択してください</option>
+              <option value="1month">1か月以内</option>
+              <option value="2-3months">2～3か月以内</option>
+              <option value="later">3か月以上先</option>
+              <option value="unknown">まだ未定</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="question-step">
+          <h2>引っ越しについて</h2>
+          <label>現在の住まい
+            <select id="qCurrentHome" required>
+              <option value="">選択してください</option>
+              <option value="family">実家</option>
+              <option value="alone">一人暮らし</option>
+              <option value="other">その他</option>
+            </select>
+          </label>
+          <label>引っ越し先の物件
+            <select id="qProperty" required>
+              <option value="">選択してください</option>
+              <option value="found">もう決まっている</option>
+              <option value="looking">まだ探している</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="question-step">
+          <h2>住所・行政手続き</h2>
+          <label>引っ越し先は現在と同じ市区町村ですか？
+            <select id="qMunicipality" required>
+              <option value="">選択してください</option>
+              <option value="same">同じ</option>
+              <option value="different">別の市区町村</option>
+              <option value="unknown">まだ未定</option>
+            </select>
+          </label>
+          <label>マイナンバーカード
+            <select id="qMyNumber" required>
+              <option value="">選択してください</option>
+              <option value="yes">持っている</option>
+              <option value="no">持っていない</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="question-step">
+          <h2>生活環境</h2>
+          <label>車・バイク
+            <select id="qVehicle" required>
+              <option value="">選択してください</option>
+              <option value="none">持っていない</option>
+              <option value="car">車を持っている</option>
+              <option value="bike">バイクを持っている</option>
+              <option value="both">両方持っている</option>
+            </select>
+          </label>
+          <label>仕事・学校
+            <select id="qOccupation" required>
+              <option value="">選択してください</option>
+              <option value="worker">会社員・アルバイト等</option>
+              <option value="student">学生</option>
+              <option value="other">その他</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="question-step">
+          <h2>生活スタイル</h2>
+          <label>一人暮らしですか？
+            <select id="qLiving" required>
+              <option value="">選択してください</option>
+              <option value="alone">一人暮らし</option>
+              <option value="family">家族・同居人と暮らす</option>
+            </select>
+          </label>
+          <label>荷物の量
+            <select id="qLuggage" required>
+              <option value="">選択してください</option>
+              <option value="small">少ない</option>
+              <option value="normal">普通</option>
+              <option value="large">多い</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="question-step">
+          <h2>最後に確認</h2>
+          <p class="muted">回答内容から、必要そうな手続き・やること・初期費用の項目を自動で作成します。</p>
+          <div id="answerPreview" class="preview-box"></div>
+          <label class="check-label">
+            <input id="qAgree" type="checkbox" required>
+            回答内容を初期設定として利用する
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="onboardingBack" class="secondary" disabled>戻る</button>
+          <button type="button" id="onboardingNext">次へ</button>
+          <button type="submit" id="onboardingFinish" class="primary" hidden>この内容で開始</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- メイン -->
+    <main id="mainApp" class="hidden">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">NEW LIFE SUPPORT</div>
+          <h1 id="welcomeTitle">新生活準備</h1>
+        </div>
+        <button id="resetProfileBtn" class="icon-button" title="初期設定をやり直す">⚙️</button>
+      </header>
+
+      <section id="homePage" class="page main-page">
+        <div class="hero-card">
+          <div>
+            <p class="eyebrow">YOUR PLAN</p>
+            <h2 id="homeGreeting">新生活の準備を始めよう</h2>
+            <p id="homeSummary" class="muted"></p>
+          </div>
+          <div class="progress-ring" id="homeProgress">0%</div>
+        </div>
+
+        <div class="stats-grid">
+          <button class="stat-card" data-page="taskPage">
+            <span>📋</span><strong id="homeTaskCount">0 / 0</strong><small>やること</small>
+          </button>
+          <button class="stat-card" data-page="procedurePage">
+            <span>📝</span><strong id="homeProcedureCount">0 / 0</strong><small>手続き</small>
+          </button>
+          <button class="stat-card" data-page="costPage">
+            <span>💰</span><strong id="homeCostTotal">0円</strong><small>初期費用</small>
+          </button>
+          <button class="stat-card" data-page="schedulePage">
+            <span>📅</span><strong id="homeNextDate">未設定</strong><small>引っ越し予定</small>
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="section-title">
+            <h2>今日からやること</h2>
+            <button class="text-button" data-page="taskPage">すべて見る →</button>
+          </div>
+          <div id="homeTaskPreview"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">
+            <h2>あなたの初期設定</h2>
+            <button id="editProfileBtn" class="text-button">変更</button>
+          </div>
+          <div id="profileSummary" class="profile-grid"></div>
+        </div>
+      </section>
+
+      <!-- やること -->
+      <section id="taskPage" class="page main-page hidden">
+        <div class="page-heading"><p class="eyebrow">TASKS</p><h2>やることリスト</h2><p>アンケートの回答から、あなたに必要な準備を自動で作成しています。</p></div>
+        <div class="card">
+          <div class="progress-text" id="taskProgress"></div>
+          <div class="progress-bar"><span id="taskProgressBar"></span></div>
+          <div id="taskList" class="task-list"></div>
+        </div>
+        <div class="card">
+          <h3>自分で追加</h3>
+          <div class="add-row"><input id="taskInput" placeholder="例：家具を注文する"><button id="addTaskBtn">追加</button></div>
+        </div>
+      </section>
+
+      <!-- 費用 -->
+      <section id="costPage" class="page main-page hidden">
+        <div class="page-heading"><p class="eyebrow">COST</p><h2>初期費用計算</h2><p>物件が決まったら実際の料金を登録。引っ越し費用は概算で計算します。</p></div>
+
+        <div class="card">
+          <div class="section-title"><h3>🏠 引っ越し先の物件</h3><span class="badge">ユーザー登録</span></div>
+          <p class="muted">アプリが家賃を決めるのではなく、見つけた物件の料金を登録します。</p>
+          <div class="form-grid">
+            <label>物件名<input id="propertyName" placeholder="例：○○マンション"></label>
+            <label>家賃<input id="rent" type="number" min="0" placeholder="70000"></label>
+            <label>管理費・共益費<input id="managementFee" type="number" min="0" placeholder="5000"></label>
+            <label>敷金<input id="deposit" type="number" min="0" placeholder="70000"></label>
+            <label>礼金<input id="keyMoney" type="number" min="0" placeholder="70000"></label>
+            <label>仲介手数料<input id="brokerage" type="number" min="0" placeholder="77000"></label>
+            <label>その他初期費用<input id="propertyOther" type="number" min="0" placeholder="0"></label>
+          </div>
+          <button id="savePropertyBtn" class="primary full">物件情報を保存</button>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><h3>🚚 引っ越し費用（概算）</h3><span class="badge">概算</span></div>
+          <div class="form-grid">
+            <label>人数
+              <select id="people"><option value="1">1人</option><option value="2">2人</option><option value="3">3人以上</option></select>
+            </label>
+            <label>荷物量
+              <select id="luggage"><option value="small">少ない</option><option value="normal">普通</option><option value="large">多い</option></select>
+            </label>
+            <label>距離
+              <select id="distance"><option value="short">近距離</option><option value="middle">中距離</option><option value="long">長距離</option></select>
+            </label>
+          </div>
+          <div class="estimate-box"><span>引っ越し費用の目安</span><strong id="movingResult">30,000円</strong></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><h3>🛋️ 家具・家電</h3><span class="badge">相場データ</span></div>
+          <p class="muted">現在は目安価格を登録。将来的にDBの相場データへ置き換えられる構成です。</p>
+          <div id="applianceList" class="appliance-list"></div>
+          <div class="estimate-box"><span>家具・家電合計</span><strong id="furnitureResult">0円</strong></div>
+        </div>
+
+        <div class="total-card">
+          <span>新生活の初期費用概算</span>
+          <strong id="totalResult">0円</strong>
+          <small>※物件・引っ越し・家具家電の登録内容から計算</small>
+        </div>
+      </section>
+
+      <!-- 手続き -->
+      <section id="procedurePage" class="page main-page hidden">
+        <div class="page-heading"><p class="eyebrow">PROCEDURES</p><h2>手続き案内</h2><p>「何をするか」だけでなく、完了までの流れをステップで確認できます。</p></div>
+        <div class="card">
+          <div class="progress-text" id="procedureProgress"></div>
+          <div class="progress-bar"><span id="procedureProgressBar"></span></div>
+        </div>
+        <div id="procedureList"></div>
+      </section>
+
+      <!-- スケジュール -->
+      <section id="schedulePage" class="page main-page hidden">
+        <div class="page-heading"><p class="eyebrow">SCHEDULE</p><h2>スケジュール</h2><p>引っ越し日を基準に予定を管理します。</p></div>
+        <div class="card">
+          <label>引っ越し予定日<input id="movingDate" type="date"></label>
+        </div>
+        <div class="card">
+          <h3>予定一覧</h3>
+          <div id="scheduleList"></div>
+        </div>
+      </section>
+
+      <nav class="bottom-nav">
+        <button data-page="homePage" class="active"><span>⌂</span><small>ホーム</small></button>
+        <button data-page="taskPage"><span>✓</span><small>やること</small></button>
+        <button data-page="costPage"><span>￥</span><small>費用</small></button>
+        <button data-page="procedurePage"><span>□</span><small>手続き</small></button>
+        <button data-page="schedulePage"><span>○</span><small>予定</small></button>
+      </nav>
+    </main>
+
+    <div id="toast" class="toast"></div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
