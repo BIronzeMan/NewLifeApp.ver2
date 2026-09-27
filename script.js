@@ -28,6 +28,16 @@ const procedureMaster = [
 ];
 
 let data = loadData();
+window.getAppData = function () {
+  return data;
+};
+
+window.setAppData = function (newData) {
+  data = newData;
+
+  // 端末側にも同期
+  localStorage.setItem(KEY, JSON.stringify(data));
+};
 let currentOnboardingStep = 0;
 
 function defaultData(){
@@ -36,7 +46,16 @@ function defaultData(){
 function loadData(){
   try{return JSON.parse(localStorage.getItem(KEY)) || defaultData()}catch(e){return defaultData()}
 }
-function saveData(){localStorage.setItem(KEY, JSON.stringify(data))}
+function saveData(){
+
+  // 今まで通り端末にも保存
+  localStorage.setItem(KEY, JSON.stringify(data));
+
+  // Firebaseにも保存
+  if (window.saveToFirestore) {
+    window.saveToFirestore(data);
+  }
+}
 function yen(n){return Number(n||0).toLocaleString()+"円"}
 function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800)}
 

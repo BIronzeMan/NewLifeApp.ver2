@@ -11,8 +11,42 @@
 </head>
 <body>
   <div id="app">
+    <!-- ログイン画面 -->
+<section id="authPage" class="onboarding-page">
+  <div class="hero">
+    <div class="logo-mark">🏠</div>
+    <h1>新生活支援アプリ</h1>
+    <p>ログインして新生活の準備を始めましょう。</p>
+  </div>
+
+  <div class="card form-card">
+    <h2 id="authTitle">ログイン</h2>
+
+    <label>
+      メールアドレス
+      <input id="authEmail" type="email"
+             placeholder="example@gmail.com">
+    </label>
+
+    <label>
+      パスワード
+      <input id="authPassword" type="password"
+             placeholder="6文字以上">
+    </label>
+
+    <button id="loginBtn" class="primary full">
+      ログイン
+    </button>
+
+    <button id="registerBtn" class="secondary full">
+      新規登録
+    </button>
+
+    <p id="authMessage" class="muted"></p>
+  </div>
+</section>
     <!-- 初回アンケート -->
-    <section id="onboardingPage" class="page onboarding-page">
+    <section id="onboardingPage" class="page onboarding-page hidden">
       <div class="hero">
         <div class="logo-mark">🏠</div>
         <h1>新生活支援アプリ</h1>
@@ -141,6 +175,7 @@
           <div class="eyebrow">NEW LIFE SUPPORT</div>
           <h1 id="welcomeTitle">新生活準備</h1>
         </div>
+        <button id="logoutBtn" class="icon-button" title="ログアウト">ログアウト</button>
         <button id="resetProfileBtn" class="icon-button" title="初期設定をやり直す">⚙️</button>
       </header>
 
@@ -283,5 +318,6 @@
     <div id="toast" class="toast"></div>
   </div>
   <script src="script.js"></script>
+  <script type="module" src="firebase.js"></script>
 </body>
 </html>
