@@ -27,16 +27,67 @@ const procedureMaster = [
   {id:"vehicle", title:"車・バイク関係の住所変更", desc:"車やバイクを所有している場合に、必要な登録・保険等を確認します。", condition:d=>d.profile.vehicle!=="none", steps:["車検証・登録情報を確認する","管轄の手続きを確認する","必要書類を準備する","住所変更・保険等を手続きする"], url:"https://www.mlit.go.jp/jidosha/"},
 ];
 
-let data = loadData();
+let data = defaultData();
 window.getAppData = function () {
   return data;
 };
 
+// ログインしているユーザーの保存キーを作る
+function getUserStorageKey() {
+  const user = window.firebaseAuth?.currentUser;
+
+  if (!user) {
+    return null;
+  }
+
+  return "newLifeAppData_v2_" + user.uid;
+}
+
+
+// Firestoreから取得したデータをアプリに反映
 window.setAppData = function (newData) {
   data = newData;
 
-  // 端末側にも同期
-  localStorage.setItem(KEY, JSON.stringify(data));
+  const key = getUserStorageKey();
+
+  if (key) {
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+};
+
+
+// この端末に保存されているユーザーデータを読み込む
+window.loadUserLocalData = function () {
+  const key = getUserStorageKey();
+
+  if (!key) {
+    return null;
+  }
+
+  const savedData = localStorage.getItem(key);
+
+  if (!savedData) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(savedData);
+  } catch (error) {
+    console.error("ローカルデータ読み込みエラー:", error);
+    return null;
+  }
+};
+
+
+// 新しいユーザー用に初期化
+window.resetAppData = function () {
+  data = defaultData();
+
+  const key = getUserStorageKey();
+
+  if (key) {
+    localStorage.setItem(key, JSON.stringify(data));
+  }
 };
 let currentOnboardingStep = 0;
 
@@ -46,12 +97,16 @@ function defaultData(){
 function loadData(){
   try{return JSON.parse(localStorage.getItem(KEY)) || defaultData()}catch(e){return defaultData()}
 }
-function saveData(){
+function saveData() {
 
-  // 今まで通り端末にも保存
-  localStorage.setItem(KEY, JSON.stringify(data));
+  const key = getUserStorageKey();
 
-  // Firebaseにも保存
+  // ログイン中のユーザー専用領域に保存
+  if (key) {
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+
+  // Firestoreにも保存
   if (window.saveToFirestore) {
     window.saveToFirestore(data);
   }
