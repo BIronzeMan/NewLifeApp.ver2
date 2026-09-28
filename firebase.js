@@ -7,7 +7,9 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   onAuthStateChanged,
-  signOut
+  signOut,
+  sendEmailVerification,
+  reload
 } from
   "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
@@ -62,14 +64,17 @@ registerBtn.addEventListener("click", async () => {
 
   try {
 
-    await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    const userCredential =
+      await createUserWithEmailAndPassword(auth, email, password);
 
-    authMessage.textContent =
-      "アカウントを作成しました！";
+await sendEmailVerification(userCredential.user);
+
+console.log("確認メール送信成功");
+
+authMessage.textContent =
+  "確認メールを送信しました。メール内のリンクを押してください。";
+
+await signOut(auth);
 
   } catch (error) {
 
@@ -129,12 +134,34 @@ loginBtn.addEventListener("click", async () => {
 // ================================
 onAuthStateChanged(auth, async (user) => {
 
-if (user) {
+  if (user) {
 
-  console.log("ログイン中:", user.email);
-  console.log("UID:", user.uid);
+    // Firebaseから最新のメール認証状態を取得
+    await reload(user);
 
-  authPage.classList.add("hidden");
+    // メール認証がまだ終わっていない場合
+    if (!user.emailVerified) {
+
+      authPage.classList.remove("hidden");
+
+      document.getElementById("onboardingPage")
+        .classList.add("hidden");
+
+      document.getElementById("mainApp")
+        .classList.add("hidden");
+
+      authMessage.textContent =
+        "メール認証が完了していません。確認メールのリンクを押してから、再度ログインしてください。";
+
+      await signOut(auth);
+      return;
+    }
+
+    // メール認証が完了している場合
+    console.log("ログイン中:", user.email);
+    console.log("UID:", user.uid);
+
+    authPage.classList.add("hidden");
 
   // Firestoreからこのユーザーのデータを取得
   const cloudData = await window.loadFromFirestore();
